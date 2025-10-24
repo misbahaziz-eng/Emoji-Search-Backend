@@ -5,8 +5,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   favorites: {
-    type: [String], // storing emoji slugs instead of ObjectIds
-    default: [], // 👈 this prevents undefined
+    type: [String],
+    default: [],
   },
 });
 

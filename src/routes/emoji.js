@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
 // 🧩 POST seed emojis (for setup only)
 router.post("/seed", async (req, res) => {
   try {
-    const data = req.body; // array of emojis
+    const data = req.body;
     await Emoji.deleteMany({});
     await Emoji.insertMany(data);
     res.json({ message: "✅ Emojis seeded successfully" });

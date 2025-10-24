@@ -8,7 +8,6 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS configuration (single, global)
 const corsOptions = {
   origin: "http://localhost:5173",
   credentials: true, // allow cookies
@@ -19,7 +18,6 @@ const corsOptions = {
 // ✅ Apply CORS middleware once (Express 5 handles preflight automatically)
 app.use(cors(corsOptions));
 
-// ✅ Parse cookies & JSON body (order matters)
 app.use(cookieParser());
 app.use(express.json());
 
