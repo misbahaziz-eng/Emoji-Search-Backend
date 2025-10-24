@@ -118,10 +118,15 @@ router.post("/toggle", requireAuth, async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
-  const user = await User.findOne(); // use first user for demo
-  if (!user) return res.json({ favorites: [] });
-  res.json({ favorites: user.favorites });
+router.get("/", requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.json({ favorites: [] });
+    res.json({ favorites: user.favorites });
+  } catch (err) {
+    console.error("❌ Get favorites failed:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
