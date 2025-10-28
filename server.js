@@ -40,6 +40,7 @@ console.log("✅ Loaded JWT_SECRET:", process.env.JWT_SECRET);
 app.use("/api/auth", require("./src/routes/auth"));
 app.use("/api/emoji", require("./src/routes/emoji"));
 app.use("/api/favorites", require("./src/routes/favorites"));
+app.use("/api/posts", require("./src/routes/post"));
 
 // ✅ Default route
 app.get("/", (req, res) => {

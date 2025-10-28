@@ -65,41 +65,100 @@ router.post(
 /**
  * 🔑 LOGIN
  */
+// router.post(
+//   "/login",
+//   [body("email").isEmail(), body("password").exists()],
+//   async (req, res, next) => {
+//     try {
+//       const { email, password } = req.body;
+//       const user = await User.findOne({ email });
+//       if (!user)
+//         return res.status(401).json({ message: "Invalid credentials" });
+
+//       const isMatch = await bcrypt.compare(password, user.password);
+//       if (!isMatch)
+//         return res.status(401).json({ message: "Invalid credentials" });
+
+//       const token = jwt.sign(
+//         { sub: user._id.toString(), username: user.username },
+//         process.env.JWT_SECRET,
+//         { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+//       );
+//       console.log("🔐 Signing token with JWT_SECRET:", process.env.JWT_SECRET);
+
+//       const isProd = process.env.NODE_ENV === "production";
+//       res.cookie(COOKIE_NAME, token, {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV === "production" ? true : false,
+//         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+//         path: "/",
+//         maxAge: 24 * 60 * 60 * 1000,
+//       });
+
+//       console.log("✅ Cookie set successfully for:", user.email);
+//       res.json({ message: "Logged in", username: user.username });
+//     } catch (err) {
+//       console.error("❌ Login error:", err);
+//       next(err);
+//     }
+//   }
+// );
+
 router.post(
   "/login",
   [body("email").isEmail(), body("password").exists()],
   async (req, res, next) => {
     try {
+      console.log("📥 Login request body:", req.body);
+
       const { email, password } = req.body;
       const user = await User.findOne({ email });
-      if (!user)
+      if (!user) {
+        console.log("❌ No user found for email:", email);
         return res.status(401).json({ message: "Invalid credentials" });
+      }
 
       const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch)
+      if (!isMatch) {
+        console.log("❌ Password mismatch for:", email);
         return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // ✅ Log environment and JWT_SECRET
+      console.log("🔑 JWT_SECRET:", process.env.JWT_SECRET);
 
       const token = jwt.sign(
         { sub: user._id.toString(), username: user.username },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
       );
-      console.log("🔐 Signing token with JWT_SECRET:", process.env.JWT_SECRET);
+
+      console.log("✅ Token generated successfully.");
 
       const isProd = process.env.NODE_ENV === "production";
-      res.cookie(COOKIE_NAME, token, {
+      res.cookie(process.env.COOKIE_NAME || "token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production" ? true : false,
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
         path: "/",
         maxAge: 24 * 60 * 60 * 1000,
       });
 
       console.log("✅ Cookie set successfully for:", user.email);
-      res.json({ message: "Logged in", username: user.username });
+
+      res.json({
+        message: "Logged in successfully",
+        token,
+        user: {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          favorites: user.favorites,
+        },
+      });
     } catch (err) {
-      console.error("❌ Login error:", err);
-      next(err);
+      console.error("🔥 Login route failed:", err);
+      res.status(500).json({ message: "Server error", error: err.message });
     }
   }
 );
