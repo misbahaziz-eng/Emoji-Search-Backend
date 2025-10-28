@@ -114,7 +114,6 @@ router.post("/:id/react", requireAuth, async (req, res) => {
     const populated = await Post.findById(updatedPost._id)
       .populate("createdBy", "username email")
       .populate("reactions.users", "username email");
-
     res.json(populated);
   } catch (err) {
     console.error("Error reacting:", err);
